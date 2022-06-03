@@ -10,7 +10,7 @@ show tables;
 	In this schema we make two tables emp and address.and in address we use foreign key as primary key of emp table
 */
 CREATE TABLE emp ( id INT ,  name varchar(20), salary numeric(10), dept varchar(20));
-desc emp; 
+desc emp;
 select * from emp;
 
 -- insert values into table
@@ -111,6 +111,7 @@ select * from emp right join address on emp.roll_no = address.eid;
 select * from emp inner join address on emp.roll_no = address.eid;
 
 -- full join 
+use learndb;
 select * from emp left join address on emp.roll_no = address.eid union select * from emp right join address on emp.roll_no= address.eid;
 
 -- exist / not exist
@@ -163,3 +164,27 @@ insert into emp values(7,"arish",233343,"MRKT");
 /* creating index to imporve search on database */
 create index uid_first_name_idx on emp(name);
 
+show schemas;
+use learndb;
+show tables;
+
+drop table if exists movie;
+CREATE TABLE movie ( Id INT AUTO_INCREMENT PRIMARY KEY,Movie_name varchar(20), Rating int, CHECK (Rating<11 and Rating>0));
+ALTER TABLE movie auto_increment = 10;
+INSERT INTO movie (Movie_name,Rating) VALUES ("FIRST_MOVIE",7);
+INSERT INTO movie (Movie_name,Rating) VALUES ("SECOND_MOVIE",7);
+SELECT * FROM movie;
+TRUNCATE TABLE movie;
+
+-- ROW_NUMBER FUNCTION 
+SELECT * , ROW_NUMBER() OVER (PARTITION BY Movie_name,Rating) AS row_num FROM movie;
+
+-- ONLY DUPLICATE ROWS
+SELECT * FROM (SELECT Id,Movie_name,Rating,ROW_NUMBER() OVER (PARTITION BY Movie_name,Rating ORDER BY Movie_name,Rating) AS  row_num FROM movie) AS TEMP_TABLE where row_num > 1;
+SELECT * , COUNT(Movie_name) FROM movie GROUP BY Movie_name HAVING COUNT(Movie_name)>1;
+
+-- DELETE DUPLICATE ROWS
+DELETE FROM movie WHERE Id IN (SELECT Id FROM (SELECT Id,ROW_NUMBER() OVER (PARTITION BY Movie_name,Rating) as row_num FROM movie) AS TEMP_TABLE WHERE row_num > 1);
+
+-- delete duplicate row using join 
+DELETE M1 FROM movie AS M1 INNER JOIN movie AS M2 ON M1.Movie_name = M2.Movie_name WHERE M1.Id>M2.Id
