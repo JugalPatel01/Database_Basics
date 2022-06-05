@@ -73,12 +73,17 @@ select max(salary) from emp;
 select min(salary) from emp;
 select sum(salary) from emp;
 select avg(salary) from emp;
+select first(salary) from emp;
+select last(salary) from emp;
 select count(roll_no) from emp;
+select * , GROUP_CONCAT(salary) as "salary" from emp group by salary;
+select * from emp;
 
 # use of arithmetic operator in select 
 
 select (avg(salary)/100) as avgdiv100 from emp;
 select (avg(salary)*100) as avgmul100 from emp;
+
 # subqueries or nested query
 
 -- name of highest salary gainer
@@ -106,9 +111,11 @@ select * from emp join address where emp.roll_no=address.eid and roll_no in (sel
 
 -- type of join 
 select * from emp join address where emp.roll_no=address.eid and roll_no in (select distinct(eid) from address);
-select * from emp left join address on emp.roll_no=address.eid;
+select * from emp left join address on emp.roll_no=address.eid;			-- LEFT JOIN OR LEFT [OUTER] JOIN
 select * from emp right join address on emp.roll_no = address.eid;
 select * from emp inner join address on emp.roll_no = address.eid;
+select * from emp cross join address;
+select * from emp e1 , emp e2 where e1.name = e2.name;
 
 -- full join 
 use learndb;
@@ -161,8 +168,18 @@ insert into emp values(7,"arish",233343,"MRKT");
 
 
 -- indexing
+
+-- show all indexes on table
+SHOW INDEXES FROM emp IN learndb;
+
 /* creating index to imporve search on database */
 create index uid_first_name_idx on emp(name);
+
+-- drop index
+DROP INDEX uid_first_name_idx ON emp;
+
+-- explain
+EXPLAIN SELECT * FROM emp;
 
 show schemas;
 use learndb;
@@ -187,4 +204,26 @@ SELECT * , COUNT(Movie_name) FROM movie GROUP BY Movie_name HAVING COUNT(Movie_n
 DELETE FROM movie WHERE Id IN (SELECT Id FROM (SELECT Id,ROW_NUMBER() OVER (PARTITION BY Movie_name,Rating) as row_num FROM movie) AS TEMP_TABLE WHERE row_num > 1);
 
 -- delete duplicate row using join 
-DELETE M1 FROM movie AS M1 INNER JOIN movie AS M2 ON M1.Movie_name = M2.Movie_name WHERE M1.Id>M2.Id
+DELETE M1 FROM movie AS M1 INNER JOIN movie AS M2 ON M1.Movie_name = M2.Movie_name WHERE M1.Id>M2.Id;
+
+-- cast function	(DATE , DATETIME, TIME , CHAR, UNSIGNED, SIGNED ,BINARY, DECIMAL)
+SELECT CONCAT('CAST Function ',CAST(5 AS CHAR));
+SELECT CAST(3-6 AS UNSIGNED);
+SELECT CAST('3-6' AS SIGNED);
+SELECT CAST("2022-4-30" AS DATE);
+
+-- FLOW FUNCTION --> CASE,IF(),IFNULL(),NULLIF()
+SELECT IF(200>350,'YES','NO');
+SELECT IFNULL(NULL,5);
+SELECT NULLIF(NULL,"HELLO");
+
+SELECT CASE 1 
+WHEN 1 THEN 'ONE' 
+WHEN 2 THEN 'TWO'
+ ELSE 'MORE' END;
+ 
+ -- LIKE COMMAND
+ SELECT * FROM emp;
+ SELECT * FROM emp WHERE NAME LIKE 'r_ju';
+ SELECT * FROM emp WHERE NAME LIKE 'r%';
+
