@@ -84,6 +84,17 @@ select * from emp;
 select (avg(salary)/100) as avgdiv100 from emp;
 select (avg(salary)*100) as avgmul100 from emp;
 
+# range queries
+
+select * from emp where salary between 40000 and 400000;
+select * from emp where name between 'abc' and 'ravi';
+select * from emp where dept not between 'IT' and 'MRKT';
+/* 
+	we can use between opeartor between dates 
+    eg. between '2020-09-01' and '2022-09-01' 
+    eg. between #10/01/2020# and #31/01/2020#
+*/
+
 # subqueries or nested query
 
 -- name of highest salary gainer
@@ -127,6 +138,29 @@ select * from emp where exists (select eid from address where emp.roll_no = addr
 -- nth highest salary using sql
 select * from emp e1 where 2 = (Select(count(distinct salary)) from emp e2 where e2.salary>e1.salary);
 
+-- row_number(), rank(), dense_rank() and ntile(n)
+select *,row_number() over(order by dept desc) RowNumber from emp;
+select *,rank() over(order by dept desc) RankNumber from emp;
+select *,dense_rank() over(order by dept desc) DenseRankNumber from emp;
+select *, ntile(2) over (order by salary desc) ntileNumber from emp;
+
+select *,row_number() over(order by dept desc) RowNumber ,rank() over(order by dept desc) RankNumber ,dense_rank() over(order by dept desc) DenseRankNumber, ntile(2) over (order by dept desc) ntileNumber from emp;
+
+-- query for finding highest nth salary from each department
+select * from ( select *,rank() over(partition by dept order by salary desc) as r_number from emp) as dummytable where r_number<=1;
+
+/*
+	group by gives one row per group in result, meanwhile partition by gives aggregated columns with each record in the specificied table.
+*/
+
+
+/*
+	row_number function assigns the sequential rank number to each unique row.
+    rank function assigns the rank number to each row in a partition. it skips the number for similar values. 
+    dense_rank function assigns the rank number to each row in partition. it does not skip the number for similar values.
+    ntile function divides the number of rows as per specified partition and assigns unique value in the partition.
+*/
+
 -- for removing duplicate tuples
 delete from emp where roll_no in (select roll_no from(select roll_no,row_number() over (partition by roll_no,name,dept) as rownum from emp)as sub where rownum>1);
 -- or 
@@ -164,7 +198,7 @@ select * from trigger_test;
 use learndb;
 show tables;
 select * from emp;
-insert into emp values(7,"arish",233343,"MRKT");
+insert into emp values(7,"amc",233343,"MRKT");
 
 
 -- indexing
@@ -227,3 +261,6 @@ WHEN 2 THEN 'TWO'
  SELECT * FROM emp WHERE NAME LIKE 'r_ju';
  SELECT * FROM emp WHERE NAME LIKE 'r%';
 
+-- select nth row using rownum / ROW_NUMBER() function
+SET @row_number = 0;
+select * from (select * ,(@row_number:=@row_number + 1) as rownumber from emp) as temp_table where rownumber = 5;
